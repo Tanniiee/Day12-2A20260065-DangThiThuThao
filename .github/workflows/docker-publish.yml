@@ -119,7 +119,9 @@ jobs:
       - name: Check image size
         if: github.event_name != 'pull_request'
         run: |
-          TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-$(echo ${{ github.sha }} | cut -c1-7)"
+          # Lấy tag đầu tiên do metadata-action sinh ra (không tự ghép để khỏi lệch format)
+          TAG=$(printf '%s\n' "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "Pulling: $TAG"
           docker pull "$TAG"
           SIZE_MB=$(docker image inspect "$TAG" --format='{{.Size}}' | awk '{printf "%d", $1/1024/1024}')
           echo "Image size: ${SIZE_MB} MB"
