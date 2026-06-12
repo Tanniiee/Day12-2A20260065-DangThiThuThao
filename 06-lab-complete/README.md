@@ -77,7 +77,7 @@ pytest tests/ -v
 
 ## CI/CD — GHCR (GitHub Container Registry)
 
-Workflow `.github/workflows/docker-publish.yml` tự động khi push lên `main`:
+Workflow `.github/workflows/docker-publish.yml` (đặt ở **root repo**, vì GitHub chỉ đọc workflow tại root) tự động khi push lên `main` có thay đổi trong `06-lab-complete/`:
 
 1. Chạy `pytest` (fail → không build)
 2. Build multi-stage image (cache layer qua GitHub Actions cache)

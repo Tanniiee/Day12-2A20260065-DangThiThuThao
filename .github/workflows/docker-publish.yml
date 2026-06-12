@@ -1,6 +1,9 @@
 # =============================================================================
 # CI/CD — Build & push Docker image lên GitHub Container Registry (GHCR)
 #
+# LƯU Ý: file này phải nằm ở .github/workflows/ tại ROOT của repo.
+# App nằm trong thư mục con 06-lab-complete/ → mọi path bên dưới trỏ vào đó.
+#
 # Trigger:
 #   - push lên main          → build + push tag latest, sha, branch
 #   - tag v* (vd: v1.0.0)    → build + push tag semver
@@ -16,12 +19,18 @@ on:
   push:
     branches: ["main"]
     tags: ["v*.*.*"]
+    paths:
+      - "06-lab-complete/**"
+      - ".github/workflows/docker-publish.yml"
   pull_request:
     branches: ["main"]
+    paths:
+      - "06-lab-complete/**"
+  workflow_dispatch: {}        # cho phép chạy tay từ tab Actions
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}   # vd: username/day12-agent-deployment
+  IMAGE_NAME: ${{ github.repository }}   # tanniiee/day12-2a20260065-dangthithuthao
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -29,6 +38,9 @@ jobs:
   # ---------------------------------------------------------------------------
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 06-lab-complete
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,6 +50,7 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
+          cache-dependency-path: 06-lab-complete/requirements.txt
 
       - name: Install dependencies
         run: |
@@ -88,8 +101,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./06-lab-complete           # app nằm trong thư mục con
+          file: ./06-lab-complete/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -101,8 +114,9 @@ jobs:
       - name: Check image size
         if: github.event_name != 'pull_request'
         run: |
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-$(echo ${{ github.sha }} | cut -c1-7)
-          SIZE_MB=$(docker image inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-$(echo ${{ github.sha }} | cut -c1-7) --format='{{.Size}}' | awk '{printf "%d", $1/1024/1024}')
+          TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-$(echo ${{ github.sha }} | cut -c1-7)"
+          docker pull "$TAG"
+          SIZE_MB=$(docker image inspect "$TAG" --format='{{.Size}}' | awk '{printf "%d", $1/1024/1024}')
           echo "Image size: ${SIZE_MB} MB"
           if [ "$SIZE_MB" -gt 500 ]; then
             echo "::error::Image quá 500 MB (${SIZE_MB} MB) — vi phạm rubric Day 12"
