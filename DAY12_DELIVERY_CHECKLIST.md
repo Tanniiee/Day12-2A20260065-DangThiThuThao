@@ -1,8 +1,8 @@
 #  Delivery Checklist — Day 12 Lab Submission
 
-> **Student Name:** _________________________  
-> **Student ID:** _________________________  
-> **Date:** _________________________
+> **Student Name:** Đặng Thị Thu Thảo
+> **Student ID:** 2A202600685
+> **Date:** 12/06/2026
 
 ---
 
@@ -12,7 +12,9 @@ Submit a **GitHub repository** containing:
 
 ### 1. Mission Answers (40 points)
 
-Create a file `MISSION_ANSWERS.md` with your answers to all exercises:
+> ✅ **Đã hoàn thành** — xem [MISSION_ANSWERS.md](MISSION_ANSWERS.md): đủ Part 1-5 (8 anti-patterns, bảng so sánh dev/prod, Dockerfile + multi-stage, Railway/Render, kết quả test 401/200/429, cost guard, health checks, graceful shutdown, stateless, load balancing).
+
+Template gốc của đề (để đối chiếu):
 
 ```markdown
 # Day 12 Lab - Mission Answers
@@ -66,6 +68,8 @@ Create a file `MISSION_ANSWERS.md` with your answers to all exercises:
 
 ### 2. Full Source Code - Lab 06 Complete (60 points)
 
+> ✅ **Đã hoàn thành** — toàn bộ source trong [`06-lab-complete/`](06-lab-complete/): production-hóa **Day 8 RAG agent** (hỏi đáp pháp luật ma túy VN, BM25 retrieval + generation có citation). Cấu trúc khớp yêu cầu, bổ sung thêm `app/history.py`, `app/logging_config.py`, `app/rag/`, `app/static/` (chat UI), `tests/`, `nginx/`, `conftest.py`.
+
 Your final production-ready agent with all files:
 
 ```
@@ -88,21 +92,26 @@ your-repo/
 ```
 
 **Requirements:**
--  All code runs without errors
--  Multi-stage Dockerfile (image < 500 MB)
--  API key authentication
--  Rate limiting (10 req/min)
--  Cost guard ($10/month)
--  Health + readiness checks
--  Graceful shutdown
--  Stateless design (Redis)
--  No hardcoded secrets
+
+- [x] All code runs without errors (10/10 unit tests pass, CI xanh)
+- [x] Multi-stage Dockerfile (image < 500 MB — CI tự verify mỗi lần build)
+- [x] API key authentication (`app/auth.py`, 401, constant-time compare)
+- [x] Rate limiting 10 req/min (`app/rate_limiter.py`, sliding window Redis, 429)
+- [x] Cost guard $10/month (`app/cost_guard.py`, key theo tháng trong Redis, 402)
+- [x] Health + readiness checks (`/health`, `/ready` có ping Redis)
+- [x] Graceful shutdown (lifespan + uvicorn SIGTERM, drain in-flight requests)
+- [x] Stateless design (history/rate/budget 100% trong Redis)
+- [x] No hardcoded secrets (pydantic-settings + env vars, `.env` gitignored)
 
 ---
 
 ### 3. Service Domain Link
 
-Create a file `DEPLOYMENT.md` with your deployed service information:
+> ✅ **Đã hoàn thành** — xem [DEPLOYMENT.md](DEPLOYMENT.md).
+> **Public URL:** https://day12-2a202600685-dangthithuthao-production.up.railway.app (Railway + Redis, chat UI tại `/`)
+> **Docker image:** `ghcr.io/tanniiee/day12-2a20260065-dangthithuthao:latest` (CI/CD tự push)
+
+Template gốc của đề (để đối chiếu):
 
 ```markdown
 # Deployment Information
@@ -143,42 +152,57 @@ curl -X POST https://your-agent.railway.app/ask \
 
 ##  Pre-Submission Checklist
 
-- [ ] Repository is public (or instructor has access)
-- [ ] `MISSION_ANSWERS.md` completed with all exercises
-- [ ] `DEPLOYMENT.md` has working public URL
-- [ ] All source code in `app/` directory
-- [ ] `README.md` has clear setup instructions
-- [ ] No `.env` file committed (only `.env.example`)
-- [ ] No hardcoded secrets in code
-- [ ] Public URL is accessible and working
-- [ ] Screenshots included in `screenshots/` folder
-- [ ] Repository has clear commit history
+- [x] Repository is public (or instructor has access)
+- [x] `MISSION_ANSWERS.md` completed with all exercises (Part 1-5 + ghi chú Part 6)
+- [x] `DEPLOYMENT.md` has working public URL — https://day12-2a202600685-dangthithuthao-production.up.railway.app
+- [x] All source code in `06-lab-complete/app/` directory (Final Project = production-hóa Day 8 RAG agent)
+- [x] `README.md` has clear setup instructions (`06-lab-complete/README.md`)
+- [x] No `.env` file committed (only `.env.example`; `.env` trong `.gitignore`)
+- [x] No hardcoded secrets in code (config qua pydantic-settings + env vars)
+- [x] Public URL is accessible and working (chat UI tại `/`, API `/ask`, probes `/health` `/ready`)
+- [x] Screenshots included in `screenshots/` folder
+- [x] Repository has clear commit history
+
+**Bonus ngoài yêu cầu đề:**
+
+- [x] CI/CD: GitHub Actions tự test → build → push image lên GHCR (`.github/workflows/docker-publish.yml`) + verify image < 500 MB
+- [x] Chat UI tích hợp tại `/` (tương tác trực tiếp trên trình duyệt)
+- [x] 10 unit tests (`06-lab-complete/tests/`) — auth 401, rate limit 429, cost guard 402, stateless, UI
+- [x] Script self-test public URL: `selftest.sh`
 
 ---
 
 ##  Self-Test
 
-Before submitting, verify your deployment:
+> ✅ **Đã chạy** bằng script [`selftest.sh`](selftest.sh) trên public URL — kết quả: `/health` 200, `/ready` 200, không key → 401, có key → 200 (answer + citation), 15 calls liên tục → 200 rồi 429. Bằng chứng: `screenshots/test-results.png`.
 
 ```bash
+URL=https://day12-2a202600685-dangthithuthao-production.up.railway.app
+
 # 1. Health check
-curl https://your-app.railway.app/health
+curl $URL/health
+# {"status":"ok"}
 
 # 2. Authentication required
-curl https://your-app.railway.app/ask
-# Should return 401
+curl -X POST $URL/ask -H "Content-Type: application/json" \
+  -d '{"user_id":"test","question":"Hello"}'
+# → 401
 
 # 3. With API key works
-curl -H "X-API-Key: YOUR_KEY" https://your-app.railway.app/ask \
-  -X POST -d '{"user_id":"test","question":"Hello"}'
-# Should return 200
+curl -X POST $URL/ask -H "X-API-Key: YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":"test","question":"Hello"}'
+# → 200
 
 # 4. Rate limiting
-for i in {1..15}; do 
-  curl -H "X-API-Key: YOUR_KEY" https://your-app.railway.app/ask \
-    -X POST -d '{"user_id":"test","question":"test"}'; 
+for i in $(seq 1 15); do
+  curl -s -o /dev/null -w "%{http_code} " -X POST $URL/ask \
+    -H "X-API-Key: YOUR_KEY" -H "Content-Type: application/json" \
+    -d '{"user_id":"test","question":"test"}'
 done
-# Should eventually return 429
+# → 200 x10 rồi 429
+
+# Hoặc chạy tất cả một lần:  bash selftest.sh <AGENT_API_KEY>
 ```
 
 ---
@@ -188,7 +212,7 @@ done
 **Submit your GitHub repository URL:**
 
 ```
-https://github.com/your-username/day12-agent-deployment
+https://github.com/Tanniiee/Day12-2A202600685-DangThiThuThao
 ```
 
 **Deadline:** 17/4/2026
