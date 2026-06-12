@@ -58,7 +58,7 @@ jobs:
           pip install pytest fakeredis httpx
 
       - name: Run tests
-        run: pytest tests/ -v
+        run: python -m pytest tests/ -v
 
   # ---------------------------------------------------------------------------
   # Job 2: Build & push image

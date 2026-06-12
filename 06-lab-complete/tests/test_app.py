@@ -24,6 +24,12 @@ def fake_redis(monkeypatch):
     yield fake
 
 
+@pytest.fixture(autouse=True)
+def force_mock_llm(monkeypatch):
+    """Test không gọi OpenAI thật (deterministic, không tốn tiền, chạy offline)."""
+    monkeypatch.setattr(settings, "OPENAI_API_KEY", "")
+
+
 @pytest.fixture
 def client():
     with TestClient(app) as c:  # with → chạy lifespan (build BM25 index)
