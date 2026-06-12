@@ -52,6 +52,13 @@ def test_ready(client):
     assert res.json() == {"status": "ready"}
 
 
+def test_ui_served_at_root(client):
+    res = client.get("/")
+    assert res.status_code == 200
+    assert "text/html" in res.headers["content-type"]
+    assert "DrugLaw RAG Agent" in res.text
+
+
 # --------------------------------------------------------------------------
 # Security layer 1: Authentication
 # --------------------------------------------------------------------------

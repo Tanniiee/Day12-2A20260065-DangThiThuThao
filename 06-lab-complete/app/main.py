@@ -17,9 +17,10 @@ Agent gốc: Day 8 RAG pipeline (luật ma túy VN + báo chí) → production-h
 import time
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import Depends, FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from .auth import verify_api_key
@@ -179,11 +180,25 @@ def ask(body: AskRequest, request: Request, _key: str = Depends(verify_api_key))
     )
 
 
-@app.get("/")
+# =============================================================================
+# UI — chat interface (1 trang HTML tĩnh, cùng container, không cần service riêng)
+# =============================================================================
+
+_UI_HTML = (Path(__file__).parent / "static" / "index.html").read_text(encoding="utf-8")
+
+
+@app.get("/", response_class=HTMLResponse)
 def root():
+    """Chat UI — tương tác với agent qua trình duyệt."""
+    return HTMLResponse(_UI_HTML)
+
+
+@app.get("/info")
+def info():
     return {
         "service": "DrugLaw RAG Agent (Day 8 → Day 12 production)",
         "endpoints": {
+            "GET /": "chat UI",
             "GET /health": "liveness probe",
             "GET /ready": "readiness probe",
             "POST /ask": "hỏi đáp pháp luật ma túy (cần X-API-Key)",
