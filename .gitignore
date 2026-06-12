@@ -34,3 +34,8 @@ Thumbs.db
 # ── Docker volumes (local dev) ─────────────────────��──────
 data/
 volumes/
+
+# Exception: corpus RAG của 06-lab-complete là SOURCE DATA, phải commit
+# (không có nó thì CI test fail và Docker image không build được)
+!06-lab-complete/data/
+!06-lab-complete/data/**
