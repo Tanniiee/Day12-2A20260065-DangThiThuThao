@@ -85,7 +85,10 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          # Repo này là FORK → GITHUB_TOKEN không tạo được package mới trên GHCR
+          # → dùng PAT (classic, scope write:packages) lưu trong secret GHCR_PAT.
+          # Nếu repo không phải fork thì GITHUB_TOKEN vẫn dùng được làm fallback.
+          password: ${{ secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
 
       # Sinh tags + labels chuẩn OCI tự động
       - name: Extract metadata (tags, labels)
