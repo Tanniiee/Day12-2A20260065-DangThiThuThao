@@ -1,23 +1,26 @@
+# Render Blueprint — deploy bằng: New → Blueprint → connect repo
 services:
   - type: web
-    name: ai-agent-production
+    name: druglaw-rag-agent
     runtime: docker
-    region: singapore
-    plan: starter
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /health
-    autoDeploy: true
     envVars:
-      - key: ENVIRONMENT
-        value: production
-      - key: APP_VERSION
-        value: "1.0.0"
+      - key: AGENT_API_KEY
+        sync: false          # nhập trong dashboard, không commit
       - key: OPENAI_API_KEY
         sync: false
-      - key: AGENT_API_KEY
-        generateValue: true
-      - key: JWT_SECRET
-        generateValue: true
-      - key: DAILY_BUDGET_USD
-        value: "5.0"
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: agent-redis
+          property: connectionString
       - key: RATE_LIMIT_PER_MINUTE
-        value: "20"
+        value: "10"
+      - key: MONTHLY_BUDGET_USD
+        value: "10.0"
+
+  - type: keyvalue
+    name: agent-redis
+    plan: free
+    ipAllowList: []

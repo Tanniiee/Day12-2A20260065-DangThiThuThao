@@ -1,7 +1,18 @@
-fastapi==0.115.0
-uvicorn[standard]==0.30.0
-pydantic==2.9.0
-pyjwt==2.9.0
-python-dotenv==1.0.1
-redis==5.1.0
-psutil==6.0.0
+# Web framework
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+
+# State store (stateless design)
+redis>=5.0.0
+
+# RAG — BM25 retrieval (Day 8 Task 6, nhẹ để image < 500MB)
+rank-bm25>=0.2.2
+numpy>=1.26.0
+
+# Generation (Day 8 Task 10) — fallback mock nếu không có key
+openai>=1.30.0
+
+# Config local dev
+python-dotenv>=1.0.0

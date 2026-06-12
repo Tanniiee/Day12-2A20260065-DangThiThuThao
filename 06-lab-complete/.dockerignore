@@ -1,11 +1,25 @@
+# Secrets — TUYỆT ĐỐI không đưa vào image
+.env
+
+# Python junk
 __pycache__/
 *.pyc
-.env
-.env.*
-!.env.example
-venv/
+*.pyo
+.pytest_cache/
 .venv/
-.git/
-*.md
+venv/
+
+# Dev/CI
 tests/
-.DS_Store
+.git/
+.gitignore
+*.md
+screenshots/
+
+# Docker (không cần trong image)
+docker-compose.yml
+Dockerfile
+.dockerignore
+nginx/
+railway.toml
+render.yaml

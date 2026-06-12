@@ -1,9 +1,13 @@
+# Railway deployment config
+# Deploy: railway init && railway up
+# Nhớ: railway variables set AGENT_API_KEY=... REDIS_URL=... (add Redis plugin)
+
 [build]
-builder = "DOCKERFILE"
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2"
 healthcheckPath = "/health"
-healthcheckTimeout = 30
-restartPolicyType = "ON_FAILURE"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
